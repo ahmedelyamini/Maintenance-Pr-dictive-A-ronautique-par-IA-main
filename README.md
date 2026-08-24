@@ -1,109 +1,68 @@
-# Maintenance Prédictive Aéronautique par Intelligence Artificielle
+# Aerospace Predictive Maintenance with Machine Learning
 
-## Estimation de la Remaining Useful Life (RUL) des Turboréacteurs
+Predictive maintenance project focused on estimating the **Remaining Useful Life (RUL)** of turbofan engines using NASA C-MAPSS sensor data and machine-learning models.
 
-**Auteur :** Ahmed Elyamini
-**Établissement :** ENSA Safi – Université Cadi Ayyad
-**Département :** IRT | GATE3
-**Filière :** Smart Manufacturing / IoT / Cybersécurité
+## Project Overview
 
----
+Predictive maintenance aims to anticipate equipment degradation before failure by analyzing operational and sensor data.
 
-# 📌 Présentation du Projet
+In this project, the objective is to estimate the number of operating cycles remaining before a simulated turbofan engine reaches failure.
 
-Ce projet vise à développer un modèle d’intelligence artificielle capable de prédire la **durée de vie restante (Remaining Useful Life – RUL)** d’un turboréacteur à partir de données issues de capteurs.
+The project is based on the **NASA C-MAPSS FD001 dataset** and applies a complete machine-learning workflow including exploratory data analysis, preprocessing, feature selection, model training and performance evaluation.
 
-Dans l’industrie aéronautique la maintenance constitue un enjeu majeur. Elle doit garantir la sécurité des vols tout en maîtrisant les coûts opérationnels. La maintenance prédictive permet d’anticiper les défaillances avant qu’elles ne surviennent en exploitant les données générées par les systèmes embarqués.
+## Dataset
 
-L’objectif principal de ce projet est donc de construire un modèle de **Machine Learning capable d’estimer le nombre de cycles restants avant la panne d’un moteur**.
+The project uses the **NASA C-MAPSS FD001 dataset**, which contains:
 
----
+- 100 simulated turbofan engines
+- Run-to-failure operating cycles
+- 3 operational settings
+- 21 sensor measurements
 
-# ⚙️ Types de Maintenance dans l’Aéronautique
+Files used:
 
-### Maintenance corrective
-
-Intervention après une panne. Cette approche est interdite dans le domaine aéronautique en raison des risques critiques.
-
-### Maintenance préventive
-
-Maintenance programmée selon un calendrier ou un nombre de cycles. Elle garantit la sécurité mais peut entraîner des coûts élevés car certaines pièces sont remplacées trop tôt.
-
-### Maintenance prédictive
-
-Approche basée sur l’analyse des données capteurs afin de prévoir les défaillances avant leur apparition.
-C’est l’approche étudiée dans ce projet.
-
----
-
-# 📊 Dataset Utilisé
-
-Le projet utilise le dataset **NASA C-MAPSS (Commercial Modular Aero-Propulsion System Simulation)**.
-
-Ce dataset contient des simulations de fonctionnement de turboréacteurs avec :
-
-* **100 moteurs simulés**
-* des cycles de fonctionnement jusqu’à la panne
-* **3 paramètres opérationnels**
-* **21 capteurs**
-
-Dataset utilisé dans ce projet :
-
-```
-FD001
-```
-
-Structure des fichiers :
-
-```
+```text
 data/
- ├── train_FD001.txt
- ├── test_FD001.txt
- └── RUL_FD001.txt
+├── train_FD001.txt
+├── test_FD001.txt
+└── RUL_FD001.txt
 ```
 
----
+## Machine Learning Workflow
 
-# 🧰 Technologies et Bibliothèques
+### 1. Exploratory Data Analysis
 
-Le projet est développé en **Python** avec les bibliothèques suivantes :
+The sensor data is analyzed to understand degradation trends and identify variables that provide little useful information.
 
-* pandas
-* numpy
-* matplotlib
-* seaborn
-* scikit-learn
+The analysis includes:
 
-Installation rapide :
+- Sensor evolution over operating cycles
+- Standard-deviation analysis
+- Correlation analysis
+- Identification of low-variance sensors
 
-```bash
-pip install pandas numpy matplotlib seaborn scikit-learn
+### 2. Remaining Useful Life Generation
+
+For the training dataset, the target variable is calculated as:
+
+```text
+RUL = maximum engine cycle - current cycle
 ```
 
----
+This represents the estimated number of operating cycles remaining before failure.
 
-# 🧪 Méthodologie
+### 3. Data Preprocessing
 
-Le projet suit une démarche classique de **data science appliquée à la maintenance prédictive**.
+The preprocessing pipeline includes:
 
-## 1 Analyse Exploratoire des Données (EDA)
+- Removal of identifiers and cycle columns from model inputs
+- Removal of constant or near-constant sensors
+- Feature scaling with `MinMaxScaler`
+- Preparation of train and test datasets
 
-Objectifs :
+Sensors excluded during the analysis:
 
-* comprendre la structure des données
-* analyser l’évolution des capteurs
-* identifier les capteurs inutiles
-
-Actions réalisées :
-
-* visualisation de l’évolution des capteurs
-* calcul des écarts types
-* suppression des capteurs constants
-* analyse des corrélations entre capteurs
-
-Capteurs supprimés :
-
-```
+```text
 sensor_1
 sensor_5
 sensor_10
@@ -112,193 +71,90 @@ sensor_18
 sensor_19
 ```
 
----
+## Models
 
-# ⚙️ Prétraitement des Données
+Two regression approaches were evaluated.
 
-## Génération de la variable cible
+### Linear Regression
 
-La variable cible est la **Remaining Useful Life (RUL)**.
+Used as a baseline model.
 
-Formule :
+| Metric | Value |
+|---|---:|
+| RMSE | 32.04 |
+| MAE | 25.59 |
+| R² | 0.40 |
 
-```
-RUL = cycle_max - cycle_actuel
-```
+### Random Forest Regressor
 
-Cela permet d’indiquer au modèle combien de cycles il reste avant la panne.
+A nonlinear ensemble model using:
 
----
-
-## Nettoyage des données
-
-Les colonnes suivantes sont supprimées :
-
-* unit_nr
-* time_cycles
-* capteurs constants
-
----
-
-## Normalisation
-
-Les données sont normalisées avec **MinMaxScaler** afin de ramener toutes les variables dans l’intervalle :
-
-```
-[0 , 1]
-```
-
-Cela permet d’éviter que certaines variables dominent artificiellement l’apprentissage.
-
----
-
-# 🤖 Modèles de Machine Learning
-
-Deux modèles ont été testés.
-
-## 1 Régression Linéaire (Baseline)
-
-La régression linéaire sert de modèle de référence.
-
-Principe :
-
-```
-RUL = β0 + β1x1 + β2x2 + ... + βnxn
-```
-
-Résultats :
-
-* RMSE : 32.04
-* MAE : 25.59
-* R² : 0.40
-
----
-
-## 2 Random Forest Regressor
-
-Le Random Forest est un ensemble d’arbres de décision.
-
-Avantages :
-
-* capture les relations non linéaires
-* robuste au bruit
-* performant sur des données complexes
-
-Paramètres utilisés :
-
-```
+```python
 n_estimators = 200
 random_state = 42
 ```
 
-Résultats :
+| Metric | Value |
+|---|---:|
+| RMSE | 33.85 |
+| MAE | 24.79 |
+| R² | 0.33 |
 
-* RMSE : 33.85
-* MAE : 24.79
-* R² : 0.33
+## Model Comparison
 
----
+| Model | RMSE | MAE | R² |
+|---|---:|---:|---:|
+| Linear Regression | 32.04 | 25.59 | 0.40 |
+| Random Forest | 33.85 | 24.79 | 0.33 |
 
-# 📈 Évaluation des Modèles
+In this implementation, Linear Regression produced the lower RMSE and higher R², while Random Forest achieved a slightly lower MAE.
 
-L’évaluation suit la méthodologie recommandée pour le dataset NASA C-MAPSS :
+The results provide a baseline for future improvements using more advanced degradation models and time-series approaches.
 
-1. utiliser le dataset **test_FD001**
-2. conserver le **dernier cycle de chaque moteur**
-3. prédire le RUL
-4. comparer avec **RUL_FD001**
+## Technologies
 
-Métriques utilisées :
+- Python
+- Pandas
+- NumPy
+- Matplotlib
+- Seaborn
+- Scikit-learn
+- Jupyter Notebook
 
-### RMSE
+## Repository Structure
 
-```
-RMSE = √(1/N Σ (y - y_pred)^2)
-```
-
-### MAE
-
-Erreur absolue moyenne.
-
-### R²
-
-Coefficient de détermination.
-
----
-
-# 📊 Visualisation des Résultats
-
-Le projet inclut plusieurs visualisations :
-
-* évolution des capteurs
-* matrice de corrélation
-* comparaison RUL réel vs RUL prédit
-* analyse des erreurs
-
-Ces graphiques permettent de mieux comprendre le comportement des modèles.
-
----
-
-# 📌 Résultats
-
-| Modèle              | RMSE  | MAE   | R²   |
-| ------------------- | ----- | ----- | ---- |
-| Régression Linéaire | 32.04 | 25.59 | 0.40 |
-| Random Forest       | 33.85 | 24.79 | 0.33 |
-
-La régression linéaire sert de référence simple.
-Le Random Forest permet de mieux modéliser les relations complexes entre capteurs.
-
----
-
-# 🚀 Applications Industrielles
-
-Ce type de modèle peut être appliqué à :
-
-* moteurs d’avions
-* turbines industrielles
-* machines de production
-* systèmes IoT industriels
-
-Bénéfices :
-
-* réduction des coûts de maintenance
-* augmentation de la disponibilité des équipements
-* amélioration de la sécurité
-
----
-
-# 📂 Structure du Projet
-
-```
-predictive-maintenance-aircraft/
-
-├── data/
-│   ├── train_FD001.txt
-│   ├── test_FD001.txt
-│   └── RUL_FD001.txt
-│
-├── notebooks/
-│   └── predictive_maintenance.ipynb
-│
-├── src/
-│   └── model_training.py
-│
+```text
+aerospace-predictive-maintenance-ai/
+├── Maintenance_Prédictive_Aéronautique_par_IA.ipynb
 ├── README.md
-└── requirements.txt
+└── data/
+    ├── train_FD001.txt
+    ├── test_FD001.txt
+    └── RUL_FD001.txt
 ```
 
----
+## Applications
 
-# 👨‍💻 Auteur
+The same predictive-maintenance principles can be applied to:
 
-**Ahmed Elyamini**
-ENSA Safi – Université Cadi Ayyad
+- Aircraft propulsion systems
+- Industrial turbines
+- Rotating machinery
+- Smart manufacturing equipment
+- Industrial IoT systems
 
-Filière : Smart Manufacturing / IoT / Cybersécurité
+## Possible Improvements
 
----
+Future work could include:
 
-# 📜 Licence
+- Gradient Boosting or XGBoost
+- LSTM or other sequence models
+- Feature engineering based on degradation trends
+- Hyperparameter optimization
+- Health-index generation
+- Uncertainty estimation for RUL predictions
 
-Projet académique à usage pédagogique et de recherche.
+## Author
+
+**Ahmed EL YAMINI**  
+Aeronautical Engineering & Space Technologies
